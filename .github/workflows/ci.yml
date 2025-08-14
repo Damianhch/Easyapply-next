@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Note missing DATABASE_URL (skip DB validation)
+        if: ${{ !secrets.DATABASE_URL }}
+        run: echo "No DATABASE_URL secret set. Skipping DB validation steps."
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests (if present)
+        run: npm test --if-present
+
+      - name: Summarize
+        run: echo "CI completed. Failing any step above will block PR merge."
+
+

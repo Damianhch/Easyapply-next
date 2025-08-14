@@ -25,10 +25,6 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      - name: Note missing DATABASE_URL (skip DB validation)
-        if: ${{ !secrets.DATABASE_URL }}
-        run: echo "No DATABASE_URL secret set. Skipping DB validation steps."
-
       - name: Type check
         run: npm run typecheck
 

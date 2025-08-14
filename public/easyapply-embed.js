@@ -5,7 +5,7 @@
     var minHeightAttr = (options && options.minHeight) || (document.currentScript && document.currentScript.getAttribute('data-height')) || '400px';
 
     var iframe = document.createElement('iframe');
-    iframe.src = origin.replace(/\/$/, '') + '/embed/' + encodeURIComponent(slug);
+    iframe.src = origin.replace(/\/$/, '') + '/inline/' + encodeURIComponent(slug);
     iframe.style.width = '100%';
     iframe.style.border = '0';
     iframe.style.minHeight = minHeightAttr;

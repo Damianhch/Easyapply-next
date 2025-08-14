@@ -20,6 +20,8 @@
 - WP_BASE_URL
 - WP_JWT_SECRET or WP_JWT_PUBLIC_KEY
 - API_SHARED_SECRET
+- GMAIL_BACKEND_URL (e.g., https://gmail-backend.example.com)
+- GMAIL_BACKEND_API_KEY (if your GmailBackend requires it)
 
 ## Backend routes (Stage 2)
 
@@ -28,6 +30,12 @@
 - POST /api/generate/application → generate cover letter
 - POST /api/webhooks/wp → WP webhook (signed)
 - GET /api/cron/daily → cron housekeeping
+- Gmail proxy:
+- GET /api/gmail/list?q=...
+- GET /api/gmail/[id]
+- POST /api/gmail/send { to, subject, text?, html?, from? }
+- Maps proxy:
+- GET /api/maps/geocode?q=
 
 ## Embeds
 

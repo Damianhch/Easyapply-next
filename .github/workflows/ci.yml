@@ -3,12 +3,13 @@ name: CI
 on:
   pull_request:
   push:
-    branches-ignore:
-      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,23 +19,18 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: apps/web/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
-        run: npx prisma generate
-
       - name: Type check
-        run: npm run typecheck
+        run: npm run typecheck --if-present
 
       - name: Build
-        run: npm run build
+        run: npm run build --if-present
 
-      - name: Run tests (if present)
+      - name: Run tests
         run: npm test --if-present
-
-      - name: Summarize
-        run: echo "CI completed. Failing any step above will block PR merge."
 
 

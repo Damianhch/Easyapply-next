@@ -1,0 +1,69 @@
+PHASE 1 — FRONTEND & EMBEDDING
+
+1) Run locally
+- npm install
+- npm run dev (serves at http://localhost:4000)
+
+2) Pages and sections
+- Visit /home for the homepage (static for now)
+- Visit /sections/hero (or /sections/cta, /sections/features)
+- Visit /embed/hero to see the iframe-friendly version
+
+3) Embed into WordPress
+- Add this HTML where you want the section:
+  <script src="https://<vercel-domain>/easyapply-embed.js"
+    data-target=".ea-slot"
+    data-slug="hero"
+    data-height="auto"
+    defer></script>
+  <div class="ea-slot"></div>
+- Change data-slug to cta or features as needed
+
+4) Healthcheck
+- GET /api/health returns { ok: true, ts }
+
+
+PHASE 2 — BACKEND (Prisma, Supabase, JWT, APIs)
+
+1) Environment variables (Vercel project settings)
+- DATABASE_URL=postgresql://<user>:<pass>@<host>:<port>/<db>
+- WP_BASE_URL=https://your-wp-site.com
+- WP_JWT_SECRET=... (HS256) OR WP_JWT_PUBLIC_KEY=... (RS256 public key)
+- API_SHARED_SECRET=... (HMAC for webhooks)
+
+2) Prisma setup (local)
+- npx prisma init (already structured; ensure DATABASE_URL is set)
+- Update prisma/schema.prisma (already done in repo)
+- npx prisma migrate dev -n init
+- npm run prisma:generate
+
+3) Verify DB connection
+- Optional: add a test row via POST /api/applications (see #4)
+
+4) Auth + Applications API
+- WordPress should issue a JWT on login (HS256 or RS256). Store in cookie or send as Authorization: Bearer <token>.
+- POST /api/applications with JSON body:
+  { fullName, email, position, company, phone?, resumeUrl?, metadata? }
+- Requires a valid WP JWT; saves to JobApplication with userId from token.sub
+- GET /api/applications returns the caller’s applications (also requires JWT)
+
+5) Generate cover letter
+- POST /api/generate/application with { applicationId }
+- Looks up the record, writes a deterministic coverLetter string (placeholder)
+
+6) WordPress form capture (no Next.js UI needed)
+- Give inputs CSS classes in WP: .ea-fullname, .ea-email, .ea-position, .ea-company
+- Add a small inline script to collect values and POST to https://<vercel-domain>/api/applications with JWT attached
+- On success, redirect to https://<vercel-domain>/dashboard?created=<id>
+
+7) Webhooks from WP
+- Configure WP to POST JSON to https://<vercel-domain>/api/webhooks/wp
+- Sign body with HMAC SHA256 using API_SHARED_SECRET in header X-Signature
+
+8) Vercel Cron
+- Set a cron to hit GET https://<vercel-domain>/api/cron/daily daily at 02:00 UTC
+
+9) Security/quality
+- No secrets in NEXT_PUBLIC_*
+- Inputs validated server-side (zod)
+- Routes run on server (no browser-exposed keys)
